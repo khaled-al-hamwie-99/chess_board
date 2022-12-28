@@ -134,8 +134,11 @@ function createCylinder(x: number, z: number, c: string) {
 }
 const whiteTeam = new Team("w", scene);
 whiteTeam.createTeam();
+// console.log(whiteTeam.pieces);
 const blackTeam = new Team("b", scene);
 blackTeam.createTeam();
+var clickedPiece = [0, 0];
+// console.log(blackTeam.pieces);
 const raycaster = new THREE.Raycaster(); // create once
 const clickMouse = new THREE.Vector2(); // create once
 const moveMouse = new THREE.Vector2(); // create once
@@ -147,8 +150,8 @@ function intersect(pos: THREE.Vector2) {
 }
 
 window.addEventListener("click", (event) => {
-    if (draggable != null) {
-        console.log(`dropping draggable ${draggable.userData.name}`);
+    if (draggable != null && draggable.position.x < draggable.position.x + 2) {
+        // console.log(`dropping draggable ${draggable.userData.name}`);
         draggable.position.y = draggable.position.y - 2;
         draggable.position.x = getXpos(draggable.position.x);
         draggable.position.z = getZpos(draggable.position.z);
@@ -163,14 +166,20 @@ window.addEventListener("click", (event) => {
     clickMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     const found = intersect(clickMouse);
+    // console.log(found[0].object.userData.turn);
     if (found.length > 0) {
         if (
             found[0].object.userData.draggable &&
             found[0].object.userData.turn
         ) {
             draggable = found[0].object;
-            console.log(`found draggable ${draggable.userData.name}`);
-            // console.log(draggable.position.x);
+            // console.log(`found draggable ${draggable.userData.name}`);
+            // here we will get the pos of x z
+            clickedPiece[0] = draggable.position.x;
+            clickedPiece[1] = draggable.position.z;
+
+            // console.log(clickedPiece);
+            getNear(clickedPiece, draggable.userData.type);
         }
     }
 });
@@ -187,7 +196,7 @@ function dragObject() {
             for (let i = 0; i < found.length; i++) {
                 if (!found[i].object.userData.ground) continue;
                 let target = found[i].point;
-                draggable.position.x = target.x;
+                if (draggable.position.x) draggable.position.x = target.x;
                 draggable.position.z = target.z;
                 draggable.position.y = target.y + 10;
             }
@@ -222,6 +231,50 @@ function getZpos(z: number): number {
 const xPosition: number[] = [-29, -20, -12, -4, 4, 12, 20, 29];
 const zPosition: number[] = [-26, -17, -9, -1, 7, 15, 23, 31];
 
+function getNear(clicked: number[], type: string) {
+    console.log(type);
+    let result: number[][] = [];
+    console.log(clicked);
+    var xIndex = xPosition.indexOf(clicked[0]);
+    var zIndex = zPosition.indexOf(clicked[1]);
+    var availablex: number[] = [];
+    var availablez: number[] = [];
+    // for (let counter = 0; counter < 8; counter++){
+    //     if (xIndex == 0 && zIndex == 7) {
+    //         result=[];
+    //     }
+    // }
+    switch (xIndex) {
+        case 0:
+            availablex.push(1, xIndex);
+            break;
+        case 7:
+            availablex.push(6, xIndex);
+            break;
+        default:
+            availablex.push(xIndex + 1, xIndex - 1, xIndex);
+            break;
+    }
+    if (type == "w") {
+        availablez.push(zIndex - 1, zIndex);
+    } else {
+        availablez.push(zIndex + 1, zIndex);
+    }
+    console.log("availabe x is ", availablex);
+    console.log("available z is ", availablez);
+    // [[x value ,z value],[],[],[],[]]
+    for (let i = 0; i < availablex.length; i++) {
+        for (let j = 0; j < availablez.length; j++) {
+            if (!(xIndex == availablex[i] && zIndex == availablez[j]))
+                result.push([
+                    xPosition[availablex[i]],
+                    zPosition[availablez[j]],
+                ]);
+        }
+    }
+    console.log("available pos is ", result);
+    return result;
+}
 createFloor();
 
 animate();
