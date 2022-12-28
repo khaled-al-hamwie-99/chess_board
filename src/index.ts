@@ -170,7 +170,9 @@ window.addEventListener("click", (event) => {
         ) {
             draggable = found[0].object;
             console.log(`found draggable ${draggable.userData.name}`);
-            // console.log(draggable.position.x);
+            console.log('x'+draggable.position.x);
+            console.log('z'+draggable.position.z);
+
         }
     }
 });
@@ -221,7 +223,34 @@ function getZpos(z: number): number {
 }
 const xPosition: number[] = [-29, -20, -12, -4, 4, 12, 20, 29];
 const zPosition: number[] = [-26, -17, -9, -1, 7, 15, 23, 31];
+const test = ()=>{
+ switch (draggable.position.x) {
+     case -29:{
+         
+     }
+     case -20:{
 
+     }
+     case -12:{
+
+     }
+     case -4:{
+
+     }
+     case 4:{
+
+     }
+     case 12:{
+
+     }
+     case 20:{
+
+     }
+     case 29:{
+
+     }
+ }
+}
 createFloor();
 
 animate();

@@ -1,5 +1,8 @@
 import * as THREE from "three";
 import { Scene } from "three";
+var draggable: THREE.Object3D;
+
+
 
 export class Team {
     type: string;
@@ -59,4 +62,19 @@ export class Team {
         sphere.position.set(pos.x, pos.y, pos.z);
         return sphere;
     }
+
+     dragObject() {
+         if (draggable != null) {
+             const found = intersect(moveMouse);
+             if (found.length > 0) {
+                 for (let i = 0; i < found.length; i++) {
+                     if (!found[i].object.userData.ground) continue;
+                     let target = found[i].point;
+                     draggable.position.x = target.x;
+                     draggable.position.z = target.z;
+                     draggable.position.y = target.y + 10;
+                 }
+             }
+         }
+     }
 }
