@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { tsxRegex } from "ts-loader/dist/constants";
 import { Team } from "./team";
 
 // CAMERA
@@ -134,11 +135,9 @@ function createCylinder(x: number, z: number, c: string) {
 }
 const whiteTeam = new Team("w", scene);
 whiteTeam.createTeam();
-// console.log(whiteTeam.pieces);
 const blackTeam = new Team("b", scene);
 blackTeam.createTeam();
 var clickedPiece = [0, 0];
-// console.log(blackTeam.pieces);
 const raycaster = new THREE.Raycaster(); // create once
 const clickMouse = new THREE.Vector2(); // create once
 const moveMouse = new THREE.Vector2(); // create once
@@ -150,17 +149,131 @@ function intersect(pos: THREE.Vector2) {
 }
 
 window.addEventListener("click", (event) => {
-    if (draggable != null && draggable.position.x < draggable.position.x + 2) {
-        // console.log(`dropping draggable ${draggable.userData.name}`);
-        draggable.position.y = draggable.position.y - 2;
-        draggable.position.x = getXpos(draggable.position.x);
-        draggable.position.z = getZpos(draggable.position.z);
-        // console.log(fo)
-        // draggable.userData.turn = false;
-        draggable = null as any;
-        return;
-    }
+    if (draggable != null) {
+        let pieces: number[][];
+        let clickedBoard: number[] = [
+            getXpos(draggable.position.x),
+            getZpos(draggable.position.z),
+        ];
+        if (whiteTeam.turn) {
+            pieces = whiteTeam.piecesPos;
+            let result: number[][] = getNear(
+                clickedPiece,
+                draggable.userData.type,
+                pieces
+            );
+            for (let i = 0; i < result.length; i++) {
+                let res: number[] = result[i];
+                for (let j = 0; j < res.length; j++) {
+                    if (
+                        res[0] == getXpos(draggable.position.x) &&
+                        res[1] == getZpos(draggable.position.z)
+                    ) {
+                        for (let k = 0; k < blackTeam.piecesPos.length; k++) {
+                            let bp: number[] = blackTeam.piecesPos[k];
+                            let doubleKill = 0;
+                            for (let g = 0; g < bp.length; g++) {
+                                if (bp[g] == clickedBoard[g]) {
+                                    doubleKill++;
+                                }
+                                if (doubleKill == 2) {
+                                    console.log("killllll");
+                                    blackTeam.piecesPos.splice(k, 1);
+                                }
+                            }
+                        }
+                        for (let f = 0; f < whiteTeam.piecesPos.length; f++) {
+                            let wp: number[] = whiteTeam.piecesPos[f];
+                            for (let h = 0; h < wp.length; h++) {
+                                let doubleTrue = 0;
+                                if (wp[h] == clickedPiece[h]) {
+                                    doubleTrue++;
+                                }
+                                if (doubleTrue == 2) {
+                                    whiteTeam.piecesPos[f] = clickedBoard;
+                                }
+                            }
+                        }
+                        draggable.position.y = draggable.position.y - 2;
+                        draggable.position.x = getXpos(draggable.position.x);
+                        draggable.position.z = getZpos(draggable.position.z);
+                        if (getZpos(draggable.position.z) == -26) {
+                            alert("Game Over White Won the Game");
+                            window.location.reload();
+                        }
+                        draggable = null as any;
 
+                        whiteTeam.setTurn(false);
+                        blackTeam.setTurn(true);
+                        camera.position.set(-35, 80, -100);
+                        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+                        return;
+                    }
+                }
+            }
+        } else if (blackTeam.turn) {
+            pieces = blackTeam.piecesPos;
+            let result: number[][] = getNear(
+                clickedPiece,
+                draggable.userData.type,
+                pieces
+            );
+            for (let i = 0; i < result.length; i++) {
+                let res: number[] = result[i];
+                for (let j = 0; j < res.length; j++) {
+                    if (
+                        res[0] == getXpos(draggable.position.x) &&
+                        res[1] == getZpos(draggable.position.z)
+                    ) {
+                        for (let k = 0; k < whiteTeam.piecesPos.length; k++) {
+                            let wp: number[] = whiteTeam.piecesPos[k];
+                            let doubleKill = 0;
+                            for (let g = 0; g < wp.length; g++) {
+                                if (wp[g] == clickedBoard[g]) {
+                                    doubleKill++;
+                                }
+                                if (doubleKill == 2) {
+                                    console.log("kill ");
+                                    whiteTeam.piecesPos.splice(k, 1);
+                                }
+                            }
+                        }
+                        for (let f = 0; f < blackTeam.piecesPos.length; f++) {
+                            let bp: number[] = blackTeam.piecesPos[f];
+                            for (let h = 0; h < bp.length; h++) {
+                                let doubleTrue = 0;
+                                if (bp[h] == clickedPiece[h]) {
+                                    doubleTrue++;
+                                }
+                                if (doubleTrue == 2) {
+                                    blackTeam.piecesPos[f] = clickedBoard;
+                                }
+                            }
+                        }
+                        draggable.position.y = draggable.position.y - 2;
+                        draggable.position.x = getXpos(draggable.position.x);
+                        draggable.position.z = getZpos(draggable.position.z);
+                        if (getZpos(draggable.position.z) == 31) {
+                            alert("Game Over Black Won the Game");
+                            window.location.reload();
+                        }
+                        draggable = null as any;
+
+                        // whiteTeam.turn = true;
+                        // blackTeam.turn = false;
+                        whiteTeam.setTurn(true);
+                        blackTeam.setTurn(false);
+                        camera.position.set(-35, 80, 100);
+                        camera.lookAt(new THREE.Vector3(0, 0, 0));
+                        return;
+                    }
+                }
+            }
+        }
+        // draggable.userData.turn = false;
+        return alert("not allowed move");
+    }
     // THREE RAYCASTER
     clickMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     clickMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -173,13 +286,12 @@ window.addEventListener("click", (event) => {
             found[0].object.userData.turn
         ) {
             draggable = found[0].object;
-            // console.log(`found draggable ${draggable.userData.name}`);
             // here we will get the pos of x z
+
             clickedPiece[0] = draggable.position.x;
             clickedPiece[1] = draggable.position.z;
-
             // console.log(clickedPiece);
-            getNear(clickedPiece, draggable.userData.type);
+            // getNear(clickedPiece, draggable.userData.type,whiteTeam.pieces);
         }
     }
 });
@@ -196,7 +308,7 @@ function dragObject() {
             for (let i = 0; i < found.length; i++) {
                 if (!found[i].object.userData.ground) continue;
                 let target = found[i].point;
-                if (draggable.position.x) draggable.position.x = target.x;
+                draggable.position.x = target.x;
                 draggable.position.z = target.z;
                 draggable.position.y = target.y + 10;
             }
@@ -231,19 +343,12 @@ function getZpos(z: number): number {
 const xPosition: number[] = [-29, -20, -12, -4, 4, 12, 20, 29];
 const zPosition: number[] = [-26, -17, -9, -1, 7, 15, 23, 31];
 
-function getNear(clicked: number[], type: string) {
-    console.log(type);
+function getNear(clicked: number[], type: string, pieces: number[][]) {
     let result: number[][] = [];
-    console.log(clicked);
     var xIndex = xPosition.indexOf(clicked[0]);
     var zIndex = zPosition.indexOf(clicked[1]);
     var availablex: number[] = [];
     var availablez: number[] = [];
-    // for (let counter = 0; counter < 8; counter++){
-    //     if (xIndex == 0 && zIndex == 7) {
-    //         result=[];
-    //     }
-    // }
     switch (xIndex) {
         case 0:
             availablex.push(1, xIndex);
@@ -260,9 +365,6 @@ function getNear(clicked: number[], type: string) {
     } else {
         availablez.push(zIndex + 1, zIndex);
     }
-    console.log("availabe x is ", availablex);
-    console.log("available z is ", availablez);
-    // [[x value ,z value],[],[],[],[]]
     for (let i = 0; i < availablex.length; i++) {
         for (let j = 0; j < availablez.length; j++) {
             if (!(xIndex == availablex[i] && zIndex == availablez[j]))
@@ -272,7 +374,46 @@ function getNear(clicked: number[], type: string) {
                 ]);
         }
     }
-    console.log("available pos is ", result);
+
+    if (type == "w") {
+        for (let i = 0; i < result.length; i++) {
+            let res: number[] = result[i];
+            for (let j = 0; j < pieces.length; j++) {
+                let piece: number[] = pieces[j];
+                let doubleFalse = 0;
+                for (let k = 0; k < 2; k++) {
+                    if (res[k] == piece[k]) {
+                        doubleFalse++;
+                    }
+                    if (doubleFalse == 2) {
+                        result.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
+    // else {
+    //     for (let i = 0; i < result.length; i++) {
+    //         let res:number[] =result[i]
+    //         for (let j = 0; j < blackPieces.length; j++) {
+    //             let piece:number[] =blackPieces[j]
+    //             let doubleFalse = 0 ;
+    //             for(let k = 0 ; k<2;k++){
+    //                 if ( res[k] == piece[k])
+    //                 {
+    //                     doubleFalse++
+    //                 }
+    //                 if (doubleFalse == 2){
+    //                     console.log(doubleFalse)
+    //                     result.splice(i,1)
+    //                 }
+    //             }
+    //
+    //         }
+    //     }
+    //
+    // }
+    // console.log("res", result);
     return result;
 }
 createFloor();
