@@ -46,9 +46,9 @@ export class Team {
                 this.createPiece(this.xPosition[array[1]], this.zPosition[0]),
                 this.createPiece(this.xPosition[array[0]], this.zPosition[0])
             );
-            this.piecesPos[0] = [this.xPosition[array[2]], this.zPosition[7]];
-            this.piecesPos[1] = [this.xPosition[array[1]], this.zPosition[7]];
-            this.piecesPos[2] = [this.xPosition[array[0]], this.zPosition[7]];
+            this.piecesPos[0] = [this.xPosition[array[2]], this.zPosition[0]];
+            this.piecesPos[1] = [this.xPosition[array[1]], this.zPosition[0]];
+            this.piecesPos[2] = [this.xPosition[array[0]], this.zPosition[0]];
         }
     }
     createPiece(x: number, z: number) {

@@ -171,8 +171,8 @@ window.addEventListener("click", (event) => {
                     ) {
                         for (let k = 0; k < blackTeam.piecesPos.length; k++) {
                             let bp: number[] = blackTeam.piecesPos[k];
+                            let doubleKill = 0;
                             for (let g = 0; g < bp.length; g++) {
-                                let doubleKill = 0;
                                 if (bp[g] == clickedBoard[g]) {
                                     doubleKill++;
                                 }
@@ -228,8 +228,8 @@ window.addEventListener("click", (event) => {
                     ) {
                         for (let k = 0; k < whiteTeam.piecesPos.length; k++) {
                             let wp: number[] = whiteTeam.piecesPos[k];
+                            let doubleKill = 0;
                             for (let g = 0; g < wp.length; g++) {
-                                let doubleKill = 0;
                                 if (wp[g] == clickedBoard[g]) {
                                     doubleKill++;
                                 }
